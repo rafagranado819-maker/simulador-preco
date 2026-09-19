@@ -1,0 +1,17 @@
+# Dados reais — NUNCA versionar (repositório é público)
+seed*.sql
+seed*.csv
+*.local
+.env
+.env.*
+!.env.example
+
+# Sistema operacional / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dependências e build (caso venhamos a usar no futuro)
+node_modules/
+dist/
