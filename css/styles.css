@@ -249,3 +249,40 @@ details.recolhivel .conteudo { padding: 0 16px 12px; }
 /* Utilidades */
 .grande { font-size: 26px; font-weight: 700; }
 .mono { font-variant-numeric: tabular-nums; }
+
+/* --- Notebook / telas largas: navegação no topo, sem barra fixa embaixo --- */
+@media (min-width: 760px) {
+  .topo { max-width: 720px; margin: 0 auto; width: 100%; }
+
+  .navbar {
+    position: static;
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+    border-top: none;
+    border-bottom: 1px solid var(--borda);
+    box-shadow: none;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 4px 16px 0;
+  }
+  .navbar a {
+    flex: 0 0 auto;
+    flex-direction: row;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 14px;
+    font-size: 15px;
+    border-bottom: 3px solid transparent;
+    border-radius: 8px 8px 0 0;
+  }
+  .navbar a .icone { font-size: 18px; }
+  .navbar a[aria-current="page"] { border-bottom-color: var(--azul); }
+  .navbar a.futuro { pointer-events: none; }
+
+  main { padding-bottom: 32px; max-width: 720px; }
+
+  /* Simulador e triagem em duas colunas quando há espaço:
+     controles à esquerda, resposta + gráfico à direita. */
+  .tela .cartao { margin-bottom: 20px; }
+}
