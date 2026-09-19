@@ -1,0 +1,10 @@
+{
+  "name": "simulador-preco",
+  "version": "0.1.0",
+  "description": "Plataforma de controle de revenda no Mercado Livre (simulador, triagem, compras, vendas, estoque, painel).",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  }
+}
