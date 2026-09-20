@@ -257,6 +257,29 @@ begin
   end loop;
 end $$;
 
+-- ----------------------------------------------------------------------------
+-- ACESSO VIA DATA API (PostgREST / supabase-js)
+-- O papel `authenticated` precisa de permissão (GRANT) nas tabelas e views
+-- para o site conseguir ler/gravar. Quem NÃO está logado (`anon`) não recebe
+-- nada. A RLS acima é a barreira real; estes GRANTs só habilitam o acesso.
+-- (Necessário porque criamos "Automatically expose new tables" DESMARCADO.)
+-- ----------------------------------------------------------------------------
+grant usage on schema public to authenticated;
+
+grant select, insert, update, delete
+  on produtos, compras, vendas, triagens, configuracoes
+  to authenticated;
+
+grant select
+  on estoque, vendas_detalhe, produto_custo
+  to authenticated;
+
+-- (Não há sequências a liberar: os ids são uuid via gen_random_uuid.)
+
+-- Garante que o papel anônimo não tenha acesso a estes objetos.
+revoke all on produtos, compras, vendas, triagens, configuracoes from anon;
+revoke all on estoque, vendas_detalhe, produto_custo from anon;
+
 -- ============================================================================
 -- Fim do schema. Depois de rodar isto com sucesso, rode o arquivo `seed`
 -- (histórico) — que fica SÓ no seu computador, nunca no GitHub.
