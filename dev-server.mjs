@@ -25,7 +25,10 @@ createServer(async (req, res) => {
     const arquivo = normalize(join(RAIZ, caminho));
     if (!arquivo.startsWith(RAIZ)) { res.writeHead(403).end('403'); return; }
     const conteudo = await readFile(arquivo);
-    res.writeHead(200, { 'Content-Type': TIPOS[extname(arquivo)] || 'application/octet-stream' });
+    res.writeHead(200, {
+      'Content-Type': TIPOS[extname(arquivo)] || 'application/octet-stream',
+      'Cache-Control': 'no-store', // dev: sempre a versão mais nova
+    });
     res.end(conteudo);
   } catch {
     res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });

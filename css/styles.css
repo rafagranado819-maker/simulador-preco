@@ -75,6 +75,28 @@ body {
   color: var(--texto-fraco);
   font-size: 15px;
 }
+.topo-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.conta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.conta-email {
+  font-size: 13px;
+  color: var(--texto-fraco);
+  max-width: 40vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* Conteúdo */
 main {
