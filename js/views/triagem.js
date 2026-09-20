@@ -2,6 +2,12 @@
 import { triagem, minimo, lucro, LIMITES_PADRAO } from '../lib/calc.js';
 import { criarGrafico } from '../lib/chart.js';
 import { formatBRL, formatPct, lerNumero } from '../lib/format.js';
+import { salvarTriagem } from '../lib/db.js';
+import { sessaoAtual } from '../lib/auth.js';
+import { mensagem } from '../lib/ui.js';
+
+// Guarda o último cálculo, para os botões Salvar/Comprar usarem.
+let ultimo = null;
 
 const estado = {
   produto: '',
@@ -67,10 +73,10 @@ export function render(container) {
       </details>
 
       <div class="acoes">
-        <button class="botao" id="btn-salvar" disabled>Salvar triagem</button>
-        <button class="botao secundario" id="btn-comprar" disabled>Comprar</button>
+        <button class="botao" id="btn-salvar">Salvar triagem</button>
+        <button class="botao secundario" id="btn-comprar">Comprar</button>
       </div>
-      <p class="aviso-etapa">Salvar a triagem e abrir a compra ficam disponíveis na Etapa 2 (com login e banco de dados).</p>
+      <div id="tri-msg" style="margin-top:10px"></div>
     </section>
   `;
 
@@ -85,7 +91,54 @@ export function render(container) {
     });
   });
 
+  container.querySelector('#btn-salvar').addEventListener('click', () => salvar(container));
+  container.querySelector('#btn-comprar').addEventListener('click', () => comprar(container));
+
   recalcular(container);
+}
+
+async function salvar(container) {
+  const msg = container.querySelector('#tri-msg');
+  if (!ultimo) return mensagem(msg, 'Preencha os dados da triagem primeiro.', 'erro');
+
+  const sessao = await sessaoAtual();
+  if (!sessao) {
+    return mensagem(msg, 'Para salvar a triagem, entre primeiro (aba Compras → Entrar).', 'erro');
+  }
+
+  const btn = container.querySelector('#btn-salvar');
+  btn.disabled = true;
+  try {
+    await salvarTriagem({
+      produto_nome: ultimo.produto || null,
+      catalogo: ultimo.catalogo,
+      n_vendas: ultimo.vendas,
+      preco_buybox: ultimo.precoBuyBox,
+      custo: ultimo.custo,
+      comissao_pct: ultimo.comissaoPct,
+      tarifa_fixa: ultimo.tarifaFixa,
+      entrega: ultimo.entrega,
+      margem_min: ultimo.margemMinPct,
+      veredito: ultimo.veredito,
+    });
+    mensagem(msg, 'Triagem salva! Você pode consultar depois e comparar com o que aconteceu.', 'ok');
+  } catch (err) {
+    mensagem(msg, err.message, 'erro');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function comprar(container) {
+  // Leva os dados para a tela de Compras já preenchida.
+  try {
+    sessionStorage.setItem('prefill-compra', JSON.stringify({
+      produto_nome: estado.produto || '',
+      catalogo: estado.catalogo === 'sim',
+      custo_unit: lerNumero(estado.custo),
+    }));
+  } catch {}
+  location.hash = '#/compras';
 }
 
 function campoTexto(chave, rotulo, valor, tipo = 'text', dica = '') {
@@ -117,6 +170,7 @@ function recalcular(container) {
   // Precisa do básico para dar veredito.
   const faltaBasico = Number.isNaN(custo) || Number.isNaN(precoBuyBox) || Number.isNaN(comissao);
   if (faltaBasico) {
+    ultimo = null;
     alvo.innerHTML = `<div class="resposta amarelo"><p class="frase">
       Preencha custo, preço do Buy Box e comissão para ver o veredito.</p></div>`;
     return;
@@ -138,6 +192,20 @@ function recalcular(container) {
   const min = (custo > 0 && (comissao) < 1)
     ? minimo({ custo, comissao, tarifaFixa, entrega, folga })
     : NaN;
+
+  // Guarda para os botões Salvar/Comprar.
+  ultimo = {
+    produto: estado.produto.trim(),
+    catalogo: estado.catalogo === 'sim',
+    vendas,
+    precoBuyBox,
+    custo,
+    comissaoPct: lerNumero(estado.comissaoPct),
+    tarifaFixa,
+    entrega,
+    margemMinPct: lerNumero(estado.margemMinPct),
+    veredito: `${r.icone} ${r.texto}`,
+  };
 
   alvo.innerHTML = `
     <div class="resposta ${cor}">

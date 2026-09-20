@@ -124,3 +124,31 @@ export async function lerConfiguracoes() {
   checar(error);
   return data;
 }
+
+// --- Triagens ---------------------------------------------------------------
+
+export async function salvarTriagem(t) {
+  const { error } = await supabase.from('triagens').insert({
+    produto_id: t.produto_id ?? null,
+    produto_nome: t.produto_nome ?? null,
+    catalogo: t.catalogo ?? null,
+    n_vendas: t.n_vendas ?? null,
+    preco_buybox: t.preco_buybox ?? null,
+    custo: t.custo ?? null,
+    comissao_pct: t.comissao_pct ?? null,
+    tarifa_fixa: t.tarifa_fixa ?? null,
+    entrega: t.entrega ?? null,
+    margem_min: t.margem_min ?? null,
+    veredito: t.veredito ?? null,
+  });
+  checar(error);
+}
+
+export async function listarTriagens() {
+  const { data, error } = await supabase
+    .from('triagens')
+    .select('*')
+    .order('data', { ascending: false });
+  checar(error);
+  return data;
+}

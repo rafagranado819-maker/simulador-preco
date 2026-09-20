@@ -4,6 +4,7 @@ import { render as renderTriagem } from './views/triagem.js';
 import { render as renderCompras } from './views/compras.js';
 import { render as renderVendas } from './views/vendas.js';
 import { render as renderEstoque } from './views/estoque.js';
+import { render as renderPainel } from './views/painel.js';
 import { render as renderLogin } from './views/login.js';
 import { sessaoAtual, aoMudarAuth, sair } from './lib/auth.js';
 import { esc } from './lib/ui.js';
@@ -14,7 +15,7 @@ const rotas = {
   compras:   { titulo: 'Compras',   icone: '🛒', render: renderCompras },
   vendas:    { titulo: 'Vendas',    icone: '💰', render: renderVendas },
   estoque:   { titulo: 'Estoque',   icone: '📦', render: renderEstoque },
-  painel:    { titulo: 'Painel',    icone: '📊', futuro: 'Etapa 3' },
+  painel:    { titulo: 'Painel',    icone: '📊', render: renderPainel },
 };
 
 const app = document.getElementById('app');
@@ -99,3 +100,10 @@ async function iniciar() {
 }
 
 iniciar();
+
+// PWA: registra o service worker (só no site publicado, não no localhost de dev).
+if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.protocol === 'https:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}

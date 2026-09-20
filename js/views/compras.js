@@ -80,6 +80,36 @@ function montarFormulario(container, produtos) {
     e.preventDefault();
     await salvar(container);
   });
+
+  aplicarPrefill(card, sel, novo, produtos);
+}
+
+/** Se veio da Triagem pelo botão "Comprar", já preenche o formulário. */
+function aplicarPrefill(card, sel, novo, produtos) {
+  let dados;
+  try {
+    const bruto = sessionStorage.getItem('prefill-compra');
+    if (!bruto) return;
+    sessionStorage.removeItem('prefill-compra');
+    dados = JSON.parse(bruto);
+  } catch { return; }
+  if (!dados) return;
+
+  const nome = (dados.produto_nome || '').trim();
+  const existente = nome && produtos.find((p) => p.nome.toLowerCase() === nome.toLowerCase());
+
+  if (existente) {
+    sel.value = existente.id; // usa o produto que já existe
+  } else {
+    sel.value = '__novo__';
+    novo.style.display = 'block';
+    if (nome) card.querySelector('#cp-novo-nome').value = nome;
+    card.querySelector('#cp-novo-catalogo').checked = dados.catalogo !== false;
+  }
+
+  if (Number.isFinite(dados.custo_unit)) {
+    card.querySelector('#cp-custo').value = String(dados.custo_unit).replace('.', ',');
+  }
 }
 
 async function salvar(container) {
