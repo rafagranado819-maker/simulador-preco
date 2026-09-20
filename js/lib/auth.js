@@ -21,7 +21,10 @@ export async function enviarLinkMagico(email) {
   const redirect = window.location.origin + window.location.pathname;
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: redirect },
+    options: {
+      emailRedirectTo: redirect,
+      shouldCreateUser: false, // só quem já foi convidado consegue entrar
+    },
   });
   if (error) throw error;
 }
